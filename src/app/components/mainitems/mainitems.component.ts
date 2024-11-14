@@ -76,6 +76,37 @@ export class MainitemsComponent implements OnInit {
  expandedRows: { [key: number]: boolean } = {};
  mainItemsRecords: MainItem[] = [];
  subItemsRecords: SubItem[] = [];
+ selectedMainItems: MainItem[] = [];
+selectedSubItems: SubItem[] = [];
+selectedAllRecords: MainItem[] = [];
+clonedMainItem: { [s: number]: MainItem } = {};
+
+
+ constructor(private Apiservice:ApiServiceService,private messageService: MessageService, private confirmationService: ConfirmationService){}
+ ngOnInit() {
+  this.Apiservice.getServices<ServiceInfo[]>().subscribe(response => {
+    this.recordsServiceNumber = response
+  });
+  this.Apiservice.getFormula<any[]>().subscribe(response => {
+    this.recordsFormula = response;
+  });
+  this.Apiservice.getCurrency<any[]>().subscribe(response => {
+    this.recordsCurrency = response;
+  });
+  this.Apiservice.getMainItems<MainItem[]>().subscribe(response => {
+    this.mainItemsRecords = response.sort((a, b) => a.invoiceMainItemCode - b.invoiceMainItemCode);
+    //response.sort((a, b) => b.invoiceMainItemCode - a.invoiceMainItemCode);
+    console.log(this.mainItemsRecords);
+    this.loading = false;
+
+    this.totalValue = this.mainItemsRecords.reduce((sum, record) => sum + record.totalWithProfit, 0);
+    console.log('Total Value:', this.totalValue);
+  });
+  this.Apiservice.getSubItems<SubItem[]>().subscribe(response => {
+    this.subItemsRecords = response;
+    this.loadingSubItems=false;
+  });
+}
  updateProfitMargin(value: number) {
   console.log(value);
 
@@ -111,32 +142,6 @@ export class MainitemsComponent implements OnInit {
     }
   }
 }
-constructor(private Apiservice:ApiServiceService,private messageService: MessageService, private confirmationService: ConfirmationService){}
-
-ngOnInit() {
-    this.Apiservice.getServices<ServiceInfo[]>().subscribe(response => {
-      this.recordsServiceNumber = response
-    });
-    this.Apiservice.getFormula<any[]>().subscribe(response => {
-      this.recordsFormula = response;
-    });
-    this.Apiservice.getCurrency<any[]>().subscribe(response => {
-      this.recordsCurrency = response;
-    });
-    this.Apiservice.getMainItems<MainItem[]>().subscribe(response => {
-      this.mainItemsRecords = response.sort((a, b) => a.invoiceMainItemCode - b.invoiceMainItemCode);
-      //response.sort((a, b) => b.invoiceMainItemCode - a.invoiceMainItemCode);
-      console.log(this.mainItemsRecords);
-      this.loading = false;
-
-      this.totalValue = this.mainItemsRecords.reduce((sum, record) => sum + record.totalWithProfit, 0);
-      console.log('Total Value:', this.totalValue);
-    });
-    this.Apiservice.getSubItems<SubItem[]>().subscribe(response => {
-      this.subItemsRecords = response;
-      this.loadingSubItems=false;
-    });
-}
 removePropertiesFrom(obj: any, propertiesToRemove: string[]): any {
   const newObj: any = {};
 
@@ -167,8 +172,7 @@ removeProperties(obj: any, propertiesToRemove: string[]): any {
   return newObj;
 }
 // to handel checkbox selection:
-selectedMainItems: MainItem[] = [];
-selectedSubItems: SubItem[] = [];
+
 onMainItemSelection(event: any, mainItem: MainItem) {
   mainItem.selected = event.checked;
   this.selectedMainItems = event.checked
@@ -198,7 +202,6 @@ onMainItemSelection(event: any, mainItem: MainItem) {
   }
 }
 // to handle All Records Selection / Deselection 
-selectedAllRecords: MainItem[] = [];
 onSelectAllRecords(event: any): void {
   if (Array.isArray(event.checked) && event.checked.length > 0) {
     this.selectedAllRecords = [...this.mainItemsRecords];
@@ -238,7 +241,6 @@ onServiceNumberUpdateChange(event: any) {
     this.updateSelectedServiceNumberRecord = undefined;
   }
 }
-
 //In Creation SubItem to handle shortTextChangeAlowlled Flag 
 onServiceNumberChangeSubItem(event: any) {
   const selectedRecord = this.recordsServiceNumber.find(record => record.serviceNumberCode === this.selectedServiceNumberSubItem);
@@ -321,9 +323,7 @@ expandAll() {
 collapseAll() {
   this.expandedRows = {};
 }
-
 // For Edit  MainItem
-clonedMainItem: { [s: number]: MainItem } = {};
 onMainItemEditInit(record: MainItem) {
   this.clonedMainItem[record.invoiceMainItemCode] = { ...record };
 }
@@ -444,6 +444,7 @@ onMainItemEditCancel(row: MainItem, index: number) {
 }
 
 // For Edit  SubItem
+//Depends on MainItems 
 clonedSubItem: { [s: number]: SubItem } = {};
 onSubItemEditInit(record: SubItem) {
   if (record.invoiceSubItemCode) {

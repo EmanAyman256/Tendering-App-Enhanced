@@ -5,7 +5,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { MainitemsComponent } from './components/mainitems/mainitems.component';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { HeaderComponent } from './components/mainitems/header/header.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FundamentalNgxCoreModule, MessageToastModule } from '@fundamental-ngx/core';
 import { TableModule } from 'primeng/table';
@@ -27,7 +26,9 @@ import { LoadingSpinnerComponent } from './shared/loading-spinner/loading-spinne
 import { AlertComponent } from './shared/alert/alert.component';
 import { TruncateWordsPipe } from './pipes/truncate-words.pipe';
 import { SearchPipe } from './pipes/search.pipe';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';  // Import ConfirmDialogModule
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { SubitemsComponent } from './components/subitems/subitems.component';  // Import ConfirmDialogModule
+import { HeaderComponent } from './components/header/header.component';
 
 @NgModule({
   declarations: [
@@ -40,7 +41,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';  // Import ConfirmD
     AlertComponent,
     TruncateWordsPipe,
     SearchPipe,
-
+    SubitemsComponent
   ],
   imports: [
     BrowserModule,
